@@ -1,0 +1,177 @@
+package s21.peanutsh.TicTacToe.domain.model;
+
+import lombok.*;
+
+import java.util.UUID;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
+@Builder
+public class Model {
+    private int[][] field;
+    private StateGame stateGame;
+    private UUID uuidGame;
+    private String firstPlayer;
+    private Boolean playingWithComputer;
+    private String secondPlayer;
+    private Boolean gameOver;
+
+
+    public Model(boolean playingWithComputer) {
+        firstPlayer = "empty";
+        secondPlayer = "empty";
+        this.uuidGame = UUID.randomUUID();
+        field = new int[3][3];
+        this.playingWithComputer = playingWithComputer;
+        stateGame = StateGame.WAITING_PLAYERS;
+        gameOver = false;
+    }
+
+
+    public Model(Model model) {
+        Model newModel = new Model();
+        newModel.setStateGame(model.getStateGame());
+        newModel.setUuidGame(model.getUuidGame());
+        newModel.setFirstPlayer(model.getFirstPlayer());
+        newModel.setSecondPlayer(model.getSecondPlayer());
+        newModel.setPlayingWithComputer(model.getPlayingWithComputer());
+        newModel.setGameOver(model.getGameOver());
+        field = new int[3][3];
+        for (int i = 0; i < 3; i++) {
+            System.arraycopy(model.getField()[i], 0, newModel.getField()[i], 0, 3);
+        }
+    }
+
+
+    public Model getCopy() {
+        return new Model(this);
+    }
+
+    public Boolean isFullField() {
+        if (gameOver ) return false;
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (field[i][j] == 0) {
+                    return false;
+                }
+            }
+        }
+        gameOver = true;
+        stateGame = StateGame.ROW;
+        return true;
+    }
+
+    public void moveComputer(int x, int y) {
+        field[x][y] = detectComputerMove();
+        if(isWin()){
+            gameOver=true;
+            stateGame=detectComputerWinner();
+        }else{
+            isFullField();
+        }
+    }
+
+    public boolean yourTurn(String uuidUser){
+        if (uuidUser.equals(firstPlayer)){
+            return stateGame==StateGame.TURN_FIRST_PLAYER;
+        }else{
+            return stateGame==StateGame.TURN_SECOND_PLAYER;
+        }
+    }
+
+    public StateGame detectComputerWinner() {
+        if (firstPlayer.equals("computer")) {
+            return StateGame.WINNING_FIRST_PLAYER;
+        } else {
+            return StateGame.WINNING_SECOND_PLAYER;
+        }
+    }
+
+    public int detectComputerMove() {
+        if (firstPlayer.equals("computer")) {
+            return 1;
+        } else {
+            return 2;
+        }
+    }
+    public int detectUserMove() {
+        if (firstPlayer.equals("computer")) {
+            return 2;
+        } else {
+            return 1;
+        }
+    }
+
+    public void detectWinPlayer(UUID uuidUser){
+        if(firstPlayer.equals(uuidUser.toString())){
+            stateGame=StateGame.WINNING_FIRST_PLAYER;
+        }else {
+            stateGame=StateGame.WINNING_SECOND_PLAYER;
+        }
+    }
+    public void detectNextTurnPlayer(UUID uuidUser){
+        if(firstPlayer.equals(uuidUser.toString())){
+            stateGame=StateGame.TURN_SECOND_PLAYER;
+        }else {
+            stateGame=StateGame.TURN_FIRST_PLAYER;
+        }
+    }
+
+    public boolean isWin() {
+        if (gameOver) return false;
+        // проверка горизонтальных линий
+        for (int i = 0; i < 3; i++) {
+            if (field[i][0] != 0 &&
+                    field[i][0] == field[i][1] &&
+                    field[i][0] == field[i][2]
+            ) return true;
+        }
+
+        //проверка вертикальных линий
+        for (int i = 0; i < 3; i++) {
+            if (field[0][i] != 0 &&
+                    field[0][i] == field[1][i] &&
+                    field[0][i] == field[2][i]
+            ) return true;
+        }
+
+        //проверка первой диагонали
+        if (field[0][0] != 0 &&
+                field[0][0] == field[1][1] &&
+                field[0][0] == field[2][2]
+        ) return true;
+
+        //проверка второй диагонали
+        if (field[0][2] != 0 &&
+                field[0][2] == field[1][1] &&
+                field[0][2] == field[2][0]
+        ) return true;
+
+        return false;
+    }
+
+    public boolean isValidityChange(Model model) {
+        if (uuidGame!=model.getUuidGame()) return false;
+        if(stateGame!=model.getStateGame()) return false;
+        if (!firstPlayer.equals(model.getFirstPlayer())) return false;
+        if (!secondPlayer.equals(model.getSecondPlayer())) return false;
+        if(gameOver!=model.getGameOver()) return false;
+        if (playingWithComputer!=model.getPlayingWithComputer()) return false;
+        int change =0;
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (field[i][j]==0){
+                    if(model.getField()[i][j]!=0) change++;
+                }else if(field[i][j]==1||field[i][j]==2) {
+                    if(field[i][j]!=model.getField()[i][j]) return false;
+                }else {
+                    return false;
+                }
+            }
+        }
+        return change <= 1;
+    }
+}

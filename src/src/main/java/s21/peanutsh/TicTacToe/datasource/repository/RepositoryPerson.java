@@ -8,9 +8,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface RepositoryPerson extends CrudRepository<EntityPerson,Long> {
+public interface RepositoryPerson extends CrudRepository<EntityPerson, Long> {
 
     Optional<EntityPerson> findByLogin(String login);
+
     boolean existsByLogin(String login);
+
     Optional<EntityPerson> findByUuid(UUID uuid);
 }

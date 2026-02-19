@@ -1,25 +1,11 @@
 package s21.peanutsh.TicTacToe.datasource.mapper;
 
 import org.json.JSONArray;
-import s21.peanutsh.TicTacToe.datasource.model.EntityGame;
 import s21.peanutsh.TicTacToe.datasource.model.EntityModel;
-import s21.peanutsh.TicTacToe.domain.model.GameField;
 import s21.peanutsh.TicTacToe.domain.model.Model;
-import s21.peanutsh.TicTacToe.web.controller.Controller;
 
-import javax.swing.text.html.parser.Entity;
-import java.util.UUID;
-import java.util.logging.Logger;
 
 public class Mapper {
-    private static final Logger logger =  Logger.getLogger(Controller.class.getName());
-    public static EntityGame convertGameToEntity(GameField gameField, UUID uuid) {
-        return new EntityGame(uuid, converterFieldToJSJON(gameField.getData()), gameField.getStatus(), gameField.getWinner());
-    }
-
-    public static GameField convertEntityToGame(EntityGame entityGame) {
-        return new GameField(converterStringToField(entityGame.getField()), entityGame.getGame_status(), entityGame.getGame_won());
-    }
 
 
     private static String converterFieldToJSJON(int[][] field) {
@@ -69,8 +55,8 @@ public class Mapper {
                 .secondPlayer(entityModel.getSecondPlayer())
                 .stateGame(entityModel.getStateGame())
                 .playingWithComputer(entityModel.getBot())
-                        .gameOver(entityModel.getGameOver())
-        .build();
+                .gameOver(entityModel.getGameOver())
+                .build();
     }
 
 

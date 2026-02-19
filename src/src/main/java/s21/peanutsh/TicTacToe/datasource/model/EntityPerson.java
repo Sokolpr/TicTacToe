@@ -15,15 +15,13 @@ import java.util.UUID;
 public class EntityPerson {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private UUID uuid;
 
     private String login;
     private String password;
-    private UUID uuid;
 
 
-    public EntityPerson(String login, String password ) {
+    public EntityPerson(String login, String password) {
         this.password = password;
         this.uuid = UUID.randomUUID();
         this.login = login;

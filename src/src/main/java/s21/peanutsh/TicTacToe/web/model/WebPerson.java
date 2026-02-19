@@ -8,8 +8,14 @@ import java.util.UUID;
 @Setter
 @Builder
 @AllArgsConstructor
-@ToString
+
+
 public class WebPerson {
     private String login;
     private UUID uuid;
+
+    @Override
+    public String toString() {
+        return "Login:"+ login + "\nUUID: " + uuid;
+    }
 }

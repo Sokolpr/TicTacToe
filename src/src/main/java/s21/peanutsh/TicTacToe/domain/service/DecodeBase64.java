@@ -6,7 +6,7 @@ import java.util.Base64;
 
 public class DecodeBase64 {
     public static String[] decodeBase64(String header) throws Exception {
-        if (header==null || !header.startsWith("Basic ")){
+        if (header == null || !header.startsWith("Basic ")) {
             throw new Exception("invalid header");
         }
         String subHeader = header.substring("Basic ".length()); // отбрасываем префикс Basic

@@ -51,7 +51,7 @@ public class AuthFilter extends GenericFilter {
                         UsernamePasswordAuthenticationToken authenticationToken =
                                 new UsernamePasswordAuthenticationToken
                                         (entity.get().getUuid(), null, Collections.emptyList()); // сохраняем в токен
-                        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                        SecurityContextHolder.getContext().setAuthentication(authenticationToken); // сохраняем токен в контекст
                         filterChain.doFilter(request, response);
                         return;
 

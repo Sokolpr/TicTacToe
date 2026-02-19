@@ -16,28 +16,26 @@ import java.util.UUID;
 public class EntityModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
     @Column(unique = true, nullable = false)
     private UUID uuidGame;
     private String field;
     private Boolean bot;
-    private String firstPlayer;
-    private String secondPlayer;
+    private UUID firstPlayer;
+    private UUID secondPlayer;
     @Enumerated(EnumType.STRING)
     private StateGame stateGame;
     private Boolean gameOver;
 
 
     @Builder
-    public EntityModel(UUID uuidGame, String field, Boolean bot, String firstPlayer, String secondPlayer, StateGame stateGame,boolean gameOver) {
+public EntityModel(UUID uuidGame, String field, Boolean bot, UUID firstPlayer, UUID secondPlayer, StateGame stateGame, boolean gameOver) {
         this.uuidGame = uuidGame;
         this.field = field;
         this.bot = bot;
         this.firstPlayer = firstPlayer;
         this.secondPlayer = secondPlayer;
         this.stateGame = stateGame;
-        this.gameOver =gameOver;
+        this.gameOver = gameOver;
     }
 
 }

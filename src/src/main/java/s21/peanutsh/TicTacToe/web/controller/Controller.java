@@ -6,11 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import s21.peanutsh.TicTacToe.domain.service.ServiceGame;
-import s21.peanutsh.TicTacToe.web.model.GameStatus;
-import s21.peanutsh.TicTacToe.web.mapper.GameMapper;
-import s21.peanutsh.TicTacToe.web.model.SignUpRequest;
 import s21.peanutsh.TicTacToe.web.model.WebModel;
-import s21.peanutsh.TicTacToe.web.model.WebModelGame;
 
 import java.util.List;
 import java.util.UUID;
@@ -19,103 +15,46 @@ import java.util.logging.Logger;
 @RestController
 public class Controller {
     private static final Logger logger = Logger.getLogger(Controller.class.getName());
-
     private final ServiceGame service;
 
 
-    //    @Autowired
     public Controller(ServiceGame service) {
         this.service = service;
     }
 
-
     @PostMapping("/game/{uuidGame}")
-    public ResponseEntity<WebModelGame> playGame(
-            @PathVariable UUID uuidGame,
-            @RequestBody WebModelGame model
-    ) {
-
-        logger.info("1 " + model.getStatus());
-
-        //Проверяем существует ли такая игра или нет
-        if (!service.gameContains(uuidGame)) {
-            service.add(GameMapper.webToDomain(model), uuidGame);
-        } else {
-
-            //Проверяем мб игра закончилась
-            if (GameMapper.domainToWeb(service.getCurrentGame(uuidGame)).getStatus() == GameStatus.GAME_OVER) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(GameMapper.domainToWeb(service.getCurrentGame(uuidGame)));//написать что игра уже закончена
-            }
-        }
-
-        logger.info("2 " + model.getStatus());
-
-
-        //Проверяем валидность данных
-        if (!service.validateStep(GameMapper.webToDomain(model), uuidGame)) {
-            var res = GameMapper.domainToWeb(service.getCurrentGame(uuidGame));
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(res);
-        }
-
-        logger.info("3 " + model.getStatus());
-
-
-        //Отправляем новые данные
-        model = GameMapper.domainToWeb(service.update1(GameMapper.webToDomain(model), uuidGame));
-
-
-        // Проверяем закончилась ли она победой игрока
-        if (model.getStatus() == GameStatus.GAME_OVER) {
-            return ResponseEntity.status(HttpStatus.OK).body(model);
-        }
-
-        logger.info("4 " + model.getStatus());
-
-        //Компьютер делает свой ход
-        model = GameMapper.domainToWeb(service.generateNextStep(GameMapper.webToDomain(model), uuidGame));
-
-
-        logger.info("5 " + model.getStatus());
-
-
-        // Проверяем закончилась ли она победой компьютера
-        if (model.getStatus() == GameStatus.GAME_OVER) {
-            return ResponseEntity.status(HttpStatus.OK).body(model);
-        }
-
-        logger.info("6 " + model.getStatus());
-
-
-        return ResponseEntity.ok(model);
-    }
-
-
-    @PostMapping("/game/{uuidGame}")
-    public ResponseEntity<String> update(
+    public ResponseEntity<WebModel> update(
             @PathVariable UUID uuidGame,
             @RequestBody WebModel webModel
     ) {
-        try {
-            return ResponseEntity.ok(
-                    service.update(webModel, (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal(),
-                            service.isValidityGame(
-                                    uuidGame,
-                                    (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal(),
-                                    webModel)
-                    ).toString());
 
-        } catch (Exception exception) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
+        try {
+            service.isValidityGame(uuidGame,
+                    (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal(),
+                    webModel);
+            return ResponseEntity.
+                    ok(
+                            service.update(webModel,
+                                    (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal()
+                            ));
+
+        } catch (Exception e) {
+            logger.info(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+
         }
 
-
-
     }
+
+
+
 
 
     //получение доступных игр
     @PostMapping("/games")
     public ResponseEntity<String> pullAvailableGames() {
+
+
         var list = service.getAvailableGames(
                 (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal()
         );
@@ -125,13 +64,7 @@ public class Controller {
             return ResponseEntity.ok(list.toString());
         }
 
-    }
 
-
-    //получение шаблона игр
-    @PostMapping("/person")
-    public ResponseEntity<SignUpRequest> getPerson() {
-        return ResponseEntity.ok(new SignUpRequest("roma", "123"));
     }
 
     //создание игры

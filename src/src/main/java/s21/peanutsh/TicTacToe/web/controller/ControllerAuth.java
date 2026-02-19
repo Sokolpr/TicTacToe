@@ -49,21 +49,22 @@ public class ControllerAuth {
         } catch (Exception ignored) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Неверный логин или пароль");
 
-    }};
+        }
+    }
+
+    ;
 
     @PostMapping("/user/{uuidUser}")
     ResponseEntity<String> getUser(
             @PathVariable UUID uuidUser
-            ){
+    ) {
         try {
             var user = serviceAuth.getUser(uuidUser);
             return ResponseEntity.ok(user.toString());
-        }catch (UsernameNotFoundException ignored){
+        } catch (UsernameNotFoundException ignored) {
             return ResponseEntity.ok("Пользователь не найден");
         }
     }
-
-
 
 
 }

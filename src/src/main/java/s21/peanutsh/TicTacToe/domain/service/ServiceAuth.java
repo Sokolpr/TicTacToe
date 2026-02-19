@@ -7,10 +7,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import s21.peanutsh.TicTacToe.datasource.model.EntityPerson;
 import s21.peanutsh.TicTacToe.datasource.repository.RepositoryPerson;
+import s21.peanutsh.TicTacToe.web.mapper.PersonMapper;
 import s21.peanutsh.TicTacToe.web.model.SignUpRequest;
 import s21.peanutsh.TicTacToe.web.model.WebPerson;
 
-import java.util.Base64;
 import java.util.UUID;
 
 @Service
@@ -26,7 +26,7 @@ public class ServiceAuth {
     }
 
 
-    public void registration(SignUpRequest signUpRequest) throws AuthorizationDeniedException  {
+    public void registration(SignUpRequest signUpRequest) throws AuthorizationDeniedException {
         if (repositoryPerson.existsByLogin(signUpRequest.getLogin())) {
             throw new AuthorizationDeniedException("Login already exists");
         }
@@ -44,33 +44,26 @@ public class ServiceAuth {
 
         } catch (Exception e) {
             throw new Exception("Invalid Authorization header");
-        };
+        }
+        ;
         var entity = repositoryPerson.findByLogin(auth[0]);
         if (entity.isPresent()) {
             if (passwordEncoder.matches(auth[1], entity.get().getPassword())) {
                 return entity.get().getUuid();
             }
             throw new Exception("неверный пароль");
-        }
-        else {
+        } else {
             throw new Exception("Такого пользователя не существует");
         }
     }
 
     public WebPerson getUser(UUID uuidUser) throws UsernameNotFoundException {
         var user = repositoryPerson.findByUuid(uuidUser);
-        if(user.isEmpty()){
-            throw  new UsernameNotFoundException("Пользователь не существует");
+        if (user.isEmpty()) {
+            throw new UsernameNotFoundException("Пользователь не существует");
         }
-        return convertPersonToWeb(user.get());
+        return PersonMapper.entityToWeb(user.get().getLogin(), uuidUser);
     }
 
 
-
-    private static WebPerson convertPersonToWeb(EntityPerson entityPerson){
-        return WebPerson.builder()
-                .login(entityPerson.getLogin())
-                .uuid(entityPerson.getUuid())
-                .build();
-    }
 }

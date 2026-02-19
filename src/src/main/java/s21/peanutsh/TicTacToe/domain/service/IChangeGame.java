@@ -1,11 +1,13 @@
 package s21.peanutsh.TicTacToe.domain.service;
 
-import s21.peanutsh.TicTacToe.domain.model.GameField;
+import s21.peanutsh.TicTacToe.domain.model.Model;
+import s21.peanutsh.TicTacToe.web.model.WebModel;
 
 import java.util.UUID;
 
 public interface IChangeGame {
-    public GameField generateNextStep(GameField gameField, UUID uuid);
-    public boolean validateStep(GameField gameField, UUID uuid);
+    void generateComputerMove(Model model);
+
+    public void isValidityGame(UUID uuidGame, UUID uuidUser, WebModel webModel) throws Exception;
 
 }

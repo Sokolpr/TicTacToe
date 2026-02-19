@@ -20,9 +20,9 @@ public class WebModel {
     private StateGame stateGame;
     private Boolean gameOver;
 
-@Builder
+    @Builder
     public WebModel(UUID uuidGame, UUID firstPlayer_X, UUID secondPlayer_O, boolean playingWithBot, StateGame stateGame, Boolean gameOver) {
-        field=new int[3][3];
+        field = new int[3][3];
         this.uuidGame = uuidGame;
         FirstPlayer_X = firstPlayer_X;
         SecondPlayer_O = secondPlayer_O;

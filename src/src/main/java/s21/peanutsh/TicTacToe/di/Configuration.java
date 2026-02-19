@@ -11,35 +11,30 @@ import s21.peanutsh.TicTacToe.web.controller.ControllerAuth;
 
 @org.springframework.context.annotation.Configuration
 public class Configuration {
-    // Я использовал в SpringBoot @Autowired, если раскомментировать аннотации,
-    // То он сам подтягивает зависимости в нужные места.
-    // Тогда следующий код можно будет закомментировать
 
     @Bean
-    public ServiceGame serviceGame(){
+    public ServiceGame serviceGame() {
         return new ServiceGame();
     }
 
-
     @Bean
-    public Controller controller(){
+    public Controller controller() {
         return new Controller(serviceGame());
     }
+
     @Bean
-    public ServiceAuth serviceAuth(){
+    public ServiceAuth serviceAuth() {
         return new ServiceAuth(passwordEncoder());
     }
+
     @Bean
-    public ControllerAuth controllerAuth(){
+    public ControllerAuth controllerAuth() {
         return new ControllerAuth(serviceAuth());
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
-
-
 
 }

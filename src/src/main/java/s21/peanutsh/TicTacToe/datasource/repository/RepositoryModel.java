@@ -14,21 +14,24 @@ import java.util.UUID;
 @Repository
 public interface RepositoryModel extends CrudRepository<EntityModel, Long> {
 
+    @Query("SELECT em FROM EntityModel em " +
+            "WHERE em.stateGame = :stateGame " +
+            "AND (em.firstPlayer is NULL  OR em.firstPlayer <> :uuidUser) "+
+            "AND (em.secondPlayer is NULL  OR em.secondPlayer <> :uuidUser)")
+    List<EntityModel> findGames(
+            @Param("stateGame") StateGame stateGame,
+            @Param("uuidUser") UUID uuidUser
+    );
 
-    List<EntityModel> findAllByStateGameAndFirstPlayerIsNotAndSecondPlayerIsNot(StateGame stateGame, String firstPlayer, String secondPlayer);
 
-
-
-    Optional<EntityModel> findByUuidGameAndStateGame(UUID uuid,StateGame stateGame);
+    Optional<EntityModel> findByUuidGameAndStateGame(UUID uuid, StateGame stateGame);
 
     @Query("SELECT em FROM EntityModel em " +
             "WHERE em.uuidGame = :uuidGame " +
-            "AND em.gameOver = :gameOver " +
             "AND (em.firstPlayer = :user OR em.secondPlayer = :user)")
     Optional<EntityModel> findByUuidGameAndUuidUser(
             @Param("uuidGame") UUID uuidGame,
-            @Param("gameOver") Boolean gameOver,
-            @Param("user") String uuidUserString
+            @Param("user") UUID uuidUser
     );
 
     @Query("SELECT em FROM EntityModel em " +
@@ -36,7 +39,7 @@ public interface RepositoryModel extends CrudRepository<EntityModel, Long> {
             "AND (em.firstPlayer = :user OR em.secondPlayer = :user)")
     List<EntityModel> findCurrentGamesForUser(
             @Param("gameOver") Boolean gameOver,
-            @Param("user") String uuidUserString
+            @Param("user") UUID uuidUser
     );
 
     Optional<EntityModel> findByUuidGame(UUID uuidGame);

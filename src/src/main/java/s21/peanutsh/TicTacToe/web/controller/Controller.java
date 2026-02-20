@@ -23,7 +23,7 @@ public class Controller {
     }
 
     @PostMapping("/game/{uuidGame}")
-    public ResponseEntity<WebModel> update(
+    public ResponseEntity<?> update(
             @PathVariable UUID uuidGame,
             @RequestBody WebModel webModel
     ) {
@@ -52,7 +52,7 @@ public class Controller {
 
     //получение доступных игр
     @PostMapping("/games")
-    public ResponseEntity<String> pullAvailableGames() {
+    public ResponseEntity<?> pullAvailableGames() {
 
 
         var list = service.getAvailableGames(
@@ -69,7 +69,7 @@ public class Controller {
 
     //создание игры
     @PostMapping("/game/create")
-    public ResponseEntity<UUID> addGame(
+    public ResponseEntity<?> addGame(
             @RequestBody boolean bot
     ) {
         return ResponseEntity.ok(service.createGame(bot));
@@ -77,7 +77,7 @@ public class Controller {
 
     //присоединение к игре
     @PostMapping("/game/{uuidGame}/join")
-    public ResponseEntity<String> joinGame(
+    public ResponseEntity<?> joinGame(
             @PathVariable UUID uuidGame,
             @RequestBody Integer position
     ) {
@@ -91,8 +91,8 @@ public class Controller {
     }
 
     //получения текущей игры
-    @PostMapping("/game/{uuidGame}/get")
-    public ResponseEntity<WebModel> getGame(
+    @PatchMapping("/game/{uuidGame}/get")
+    public ResponseEntity<?> getGame(
             @PathVariable UUID uuidGame
     ) {
         try {
@@ -108,7 +108,7 @@ public class Controller {
 
     //получения всех текущих игр
     @PostMapping("/game/get_current")
-    public ResponseEntity<List<UUID>> getAllGames(
+    public ResponseEntity<List<?>> getAllGames(
     ) {
         try {
             return ResponseEntity.ok(service.getAllCurrentGames(

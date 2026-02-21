@@ -47,9 +47,6 @@ public class Controller {
     }
 
 
-
-
-
     //получение доступных игр
     @PostMapping("/games")
     public ResponseEntity<?> pullAvailableGames() {

@@ -1,68 +1,97 @@
 package s21.peanutsh.TicTacToe.domain.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import io.jsonwebtoken.JwtException;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import s21.peanutsh.TicTacToe.datasource.model.EntityPerson;
-import s21.peanutsh.TicTacToe.datasource.repository.RepositoryPerson;
+import s21.peanutsh.TicTacToe.datasource.model.TokenEntity;
+import s21.peanutsh.TicTacToe.datasource.repository.TokenRepository;
 import s21.peanutsh.TicTacToe.web.mapper.PersonMapper;
-import s21.peanutsh.TicTacToe.web.model.SignUpRequest;
-import s21.peanutsh.TicTacToe.web.model.WebPerson;
+import s21.peanutsh.TicTacToe.web.model.*;
 
+import java.util.Set;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class ServiceAuth {
 
     private final PasswordEncoder passwordEncoder;
+    private final UserService userService;
+    private final JwtProvider jwtProvider;
+    private final TokenRepository tokenRepository;
 
-    @Autowired
-    private RepositoryPerson repositoryPerson;
-
-    public ServiceAuth(PasswordEncoder passwordEncoder) {
-        this.passwordEncoder = passwordEncoder;
-    }
 
 
     public void registration(SignUpRequest signUpRequest) throws AuthorizationDeniedException {
-        if (repositoryPerson.existsByLogin(signUpRequest.getLogin())) {
-            throw new AuthorizationDeniedException("Login already exists");
-        }
-        //переделать через маппер
-        repositoryPerson.save(new EntityPerson(signUpRequest.getLogin(), passwordEncoder.encode(signUpRequest.getPassword())));
+        userService.signUp(signUpRequest);
+    }
 
+    public JWTResponse updateAccessToken(String refresh){
+        return updateToken(refresh,"access");
+    }
+
+    public JWTResponse updateRefreshToken(String refresh){
+        return updateToken(refresh,"refresh");
     }
 
 
-    //header имеет вид "Basic {закодированный пароль}"
-    public UUID authorize(String header) throws Exception {
-        String[] auth;
-        try {
-            auth = DecodeBase64.decodeBase64(header);
 
-        } catch (Exception e) {
-            throw new Exception("Invalid Authorization header");
-        }
-        ;
-        var entity = repositoryPerson.findByLogin(auth[0]);
-        if (entity.isPresent()) {
-            if (passwordEncoder.matches(auth[1], entity.get().getPassword())) {
-                return entity.get().getUuid();
-            }
-            throw new Exception("неверный пароль");
-        } else {
-            throw new Exception("Такого пользователя не существует");
+    public JWTResponse authorize(JWTRequest jwtRequest) throws Exception {
+        var user = userService.loadUserByUsername(jwtRequest.getLogin());
+        if (passwordEncoder.matches(jwtRequest.getPassword(), user.getPassword())){
+            var access= jwtProvider.generationAccessToken(user);
+            var refresh = jwtProvider.generationRefreshToken(user);
+            tokenRepository.save(
+                    TokenEntity.builder()
+                            .token(refresh)
+                            .uuid(user.getUuid())
+                            .build()
+            );
+            return JWTResponse
+                    .builder()
+                    .accessToken(access)
+                    .refreshToken(refresh)
+                    .build();
+        }else {
+            throw new Exception("invalid password");
         }
     }
 
     public WebPerson getUser(UUID uuidUser) throws UsernameNotFoundException {
-        var user = repositoryPerson.findByUuid(uuidUser);
-        if (user.isEmpty()) {
-            throw new UsernameNotFoundException("Пользователь не существует");
+        var user = userService.getByUuid(uuidUser);
+        return PersonMapper.entityToWeb(user.getLogin(), uuidUser);
+    }
+
+    public JwtAuthentication getAuth(){
+       return (JwtAuthentication) SecurityContextHolder.getContext().getAuthentication();
+    }
+
+
+    private JWTResponse updateToken(@NonNull String token, String type){
+        var copyToken = token;
+        if(jwtProvider.validateAccessToken(copyToken)){
+            var claims = jwtProvider.getRefreshClaims(copyToken);
+            var user= userService.getByUuid((UUID)claims.get("uuid"));
+            var updateAccess= jwtProvider.generationAccessToken(user);
+            if (type.equals("refresh")){
+                copyToken = jwtProvider.generationRefreshToken(user);
+                tokenRepository.save(TokenEntity.builder()
+                        .uuid(user.getUuid())
+                        .token(copyToken)
+                        .build());
+            }
+            return JWTResponse.builder()
+                    .refreshToken(copyToken)
+                    .accessToken(updateAccess)
+                    .build();
+        }else {
+            throw  new JwtException("Invalid Jwt token");
         }
-        return PersonMapper.entityToWeb(user.get().getLogin(), uuidUser);
     }
 
 

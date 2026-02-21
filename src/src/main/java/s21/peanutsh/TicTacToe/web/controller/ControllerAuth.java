@@ -1,21 +1,23 @@
 package s21.peanutsh.TicTacToe.web.controller;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import s21.peanutsh.TicTacToe.domain.service.ServiceAuth;
+import s21.peanutsh.TicTacToe.web.model.JWTRequest;
+import s21.peanutsh.TicTacToe.web.model.RefreshJwtRequest;
 import s21.peanutsh.TicTacToe.web.model.SignUpRequest;
 
 import java.util.UUID;
 import java.util.logging.Logger;
-
+@Slf4j
 @RestController
 public class ControllerAuth {
 
-    private static final Logger logger = Logger.getLogger(ControllerAuth.class.getName());
 
 
     private final ServiceAuth serviceAuth;
@@ -27,7 +29,7 @@ public class ControllerAuth {
     //регистрация
     @PostMapping("/auth/signup")
     ResponseEntity<?> signup(@RequestBody SignUpRequest signUpRequest) {
-        logger.info("Отправлен запрос на регистрацию");
+        log.info("Отправлен запрос на регистрацию");
         try {
             serviceAuth.registration(signUpRequest);
             return ResponseEntity.ok("Пользователь зарегистрирован");
@@ -40,19 +42,42 @@ public class ControllerAuth {
 
     //авторизация
     @PostMapping("/auth/login")
-    ResponseEntity<?> login(@RequestHeader("Authorization") String authHeader) {
-        logger.info("Отправлен запрос на авторизацию");
+    ResponseEntity<?> login(@RequestBody JWTRequest jwtRequest) {
+        log.info("Отправлен запрос на авторизацию");
         try {
-            var auth = serviceAuth.authorize(authHeader);
+            var auth = serviceAuth.authorize(jwtRequest);
             return ResponseEntity.ok(auth);
 
-        } catch (Exception ignored) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Неверный логин или пароль");
+        } catch (Exception exception) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
 
         }
     }
 
     ;
+
+
+    @PostMapping("auth/update/access")
+    ResponseEntity<?> updateAccess(
+            @RequestBody RefreshJwtRequest refreshJwtRequest){
+        try {
+            return ResponseEntity.ok(serviceAuth.updateAccessToken(refreshJwtRequest.getRefreshToken()));
+        }catch (Exception exception){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
+        }
+    }
+
+    @PostMapping("auth/update/refresh")
+    ResponseEntity<?> updateRefresh(
+            @RequestBody RefreshJwtRequest refreshJwtRequest){
+        try {
+            return ResponseEntity.ok(serviceAuth.updateRefreshToken(refreshJwtRequest.getRefreshToken()));
+        }catch (Exception exception){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
+        }
+    }
+
+
 
     @PostMapping("/user/{uuidUser}")
     ResponseEntity<String> getUser(
@@ -61,7 +86,7 @@ public class ControllerAuth {
         try {
             var user = serviceAuth.getUser(uuidUser);
             return ResponseEntity.ok(user.toString());
-        } catch (UsernameNotFoundException ignored) {
+        } catch (UsernameNotFoundException exception) {
             return ResponseEntity.ok("Пользователь не найден");
         }
     }

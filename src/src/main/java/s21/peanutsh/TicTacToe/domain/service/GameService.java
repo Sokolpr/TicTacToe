@@ -1,6 +1,7 @@
 package s21.peanutsh.TicTacToe.domain.service;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import s21.peanutsh.TicTacToe.datasource.mapper.Mapper;
 import s21.peanutsh.TicTacToe.datasource.repository.ModelRepository;
@@ -16,12 +17,12 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.logging.Logger;
 
+@Slf4j
 @org.springframework.stereotype.Service
-public class ServiceGame implements IChangeGame {
-    private static final Logger logger = Logger.getLogger(Controller.class.getName());
+public class GameService implements IChangeGame {
 
     @Autowired
-    private ModelRepository repositoryModel;
+    private ModelRepository modelRepository;
 
 
     // Детальное логирование для отладки
@@ -108,14 +109,14 @@ public class ServiceGame implements IChangeGame {
     public UUID createGame(boolean playingWithComputer) {
 
         Model model = new Model(playingWithComputer);
-        repositoryModel.save(Mapper.convertModelToEntity(model));
+        modelRepository.save(Mapper.convertModelToEntity(model));
         return model.getUuidGame();
     }
 
 
     //подключение к игре
     public void joinToGame(UUID uuidUser, UUID uuidGame, Integer position) throws Exception {
-        var entityModel = repositoryModel.findByUuidGameAndStateGame(uuidGame, StateGame.WAITING_PLAYERS);
+        var entityModel = modelRepository.findByUuidGameAndStateGame(uuidGame, StateGame.WAITING_PLAYERS);
         if (entityModel.isEmpty()) {
             throw new Exception("невозможно подключиться");
         }
@@ -157,13 +158,13 @@ public class ServiceGame implements IChangeGame {
             }
         }
         var toEntity = Mapper.convertModelToEntity(model);
-        repositoryModel.save(toEntity);
+        modelRepository.save(toEntity);
     }
 
 
     //получение текущей игры
     public WebModel getCurrentModel(UUID uuidUser, UUID uuidGame) throws Exception {
-        var game = repositoryModel.findByUuidGameAndUuidUser(uuidGame, uuidUser);
+        var game = modelRepository.findByUuidGameAndUuidUser(uuidGame, uuidUser);
         if (game.isEmpty()) {
             throw new Exception("такой игры не существует");
         }
@@ -176,7 +177,7 @@ public class ServiceGame implements IChangeGame {
 
     //получение всех доступных игр
     public List<WebModel> getAvailableGames(UUID uuidUser) {
-        return repositoryModel.findGames(
+        return modelRepository.findGames(
                         StateGame.WAITING_PLAYERS, uuidUser
                 )
                 .stream()
@@ -185,10 +186,16 @@ public class ServiceGame implements IChangeGame {
                 .toList();
     }
 
+    public List<WebModel> getGameOverGame(UUID uuidUser){
+        return modelRepository.findEndGameForUser(uuidUser).stream()
+                .map(Mapper::convertEntityToModel)
+                .map(GameMapper::convertDomainToWeb)
+                .toList();
+    }
 
     //получение всех текущих игр
     public List<UUID> getAllCurrentGames(UUID uuidUser) throws Exception {
-        var list = repositoryModel.findCurrentGamesForUser(false, uuidUser);
+        var list = modelRepository.findCurrentGamesForUser(false, uuidUser);
         if (list.isEmpty()) {
             throw new Exception("нет текущих игр");
         }
@@ -199,10 +206,17 @@ public class ServiceGame implements IChangeGame {
                 .toList();
     }
 
+//    public List<WinModel> getBestPlayers(Integer count) throws Exception{
+//        if (count<0){
+//            throw new Exception("не корректные данные");
+//        }
+//
+//
+//    }
 
     //проверка, существует ли такая игра
     public void isValidityGame(UUID uuidGame, UUID uuidUser, WebModel webModel) throws Exception {
-        var entity = repositoryModel.findByUuidGame(uuidGame);
+        var entity = modelRepository.findByUuidGame(uuidGame);
         if (entity.isEmpty()) {
             throw new Exception("такой игры не существует");
         }
@@ -223,7 +237,7 @@ public class ServiceGame implements IChangeGame {
         }
 
         for (int l = 0; l < 3; l++) {
-            logger.info(Arrays.toString(model.getField()[l]));
+            log.info(Arrays.toString(model.getField()[l]));
         }
         if (model.getGameOver()) {
             throw new RuntimeException("Игра закончилась");
@@ -231,10 +245,10 @@ public class ServiceGame implements IChangeGame {
         Model convertedModel = GameMapper.convertWebToDomain(webModel);
 
         if (!model.isValidityChange(convertedModel, uuidUser)) {
-            logger.warning("Валидация не пройдена!");
+            log.warn("Валидация не пройдена!");
             throw new RuntimeException("Не корректные данные");
         } else {
-            logger.info("Валидация пройдена успешно");
+            log.info("Валидация пройдена успешно");
         }
 
 
@@ -262,7 +276,7 @@ public class ServiceGame implements IChangeGame {
 
 
         var toEntity = Mapper.convertModelToEntity(model);
-        repositoryModel.save(toEntity);
+        modelRepository.save(toEntity);
 
         return GameMapper.convertDomainToWeb(model);
 

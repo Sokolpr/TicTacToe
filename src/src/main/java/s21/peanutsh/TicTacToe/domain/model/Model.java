@@ -2,6 +2,8 @@ package s21.peanutsh.TicTacToe.domain.model;
 
 import lombok.*;
 
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -19,6 +21,7 @@ public class Model {
     private Boolean playingWithComputer;
     private UUID secondPlayer;
     private Boolean gameOver;
+    private LocalDate createDate;
 
 
     public Model(boolean playingWithComputer) {
@@ -29,6 +32,7 @@ public class Model {
         this.playingWithComputer = playingWithComputer;
         stateGame = StateGame.WAITING_PLAYERS;
         gameOver = false;
+        createDate= LocalDate.now();
     }
 
 
@@ -39,7 +43,7 @@ public class Model {
         this.secondPlayer = model.getSecondPlayer();
         this.playingWithComputer = model.getPlayingWithComputer();
         this.gameOver = model.getGameOver();
-
+        this.createDate = model.getCreateDate();
         this.field = new int[3][3];
         for (int i = 0; i < 3; i++) {
             System.arraycopy(model.getField()[i], 0, this.field[i], 0, 3);

@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface RepositoryModel extends CrudRepository<EntityModel, Long> {
+public interface ModelRepository extends CrudRepository<EntityModel, Long> {
 
     @Query("SELECT em FROM EntityModel em " +
             "WHERE em.stateGame = :stateGame " +
@@ -20,6 +20,15 @@ public interface RepositoryModel extends CrudRepository<EntityModel, Long> {
             "AND (em.secondPlayer is NULL  OR em.secondPlayer <> :uuidUser)")
     List<EntityModel> findGames(
             @Param("stateGame") StateGame stateGame,
+            @Param("uuidUser") UUID uuidUser
+    );
+
+
+    @Query("SELECT em FROM EntityModel em " +
+            "WHERE em.gameOver = true " +
+            "AND (:uuidUser = em.firstPlayer " +
+            "OR :uuidUser = em.secondPlayer)")
+    List<EntityModel> findEndGameForUser(
             @Param("uuidUser") UUID uuidUser
     );
 
@@ -43,5 +52,12 @@ public interface RepositoryModel extends CrudRepository<EntityModel, Long> {
     );
 
     Optional<EntityModel> findByUuidGame(UUID uuidGame);
+
+    @Query("SELECT em FROM EntityModel em " +
+            "WHERE em.gameOver = :gameOver " +
+            "AND (em.firstPlayer = :user OR em.secondPlayer = :user)")
+    List<EntityModel> byTambrama(
+
+    );
 
 }

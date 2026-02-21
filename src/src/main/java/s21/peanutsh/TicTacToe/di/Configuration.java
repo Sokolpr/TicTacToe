@@ -24,7 +24,7 @@ public class Configuration {
 
     @Bean
     public ServiceAuth serviceAuth() {
-        return new ServiceAuth(passwordEncoder());
+        return new ServiceAuth());
     }
 
     @Bean

@@ -4,6 +4,7 @@ package s21.peanutsh.TicTacToe.web.model;
 import lombok.*;
 import s21.peanutsh.TicTacToe.domain.model.StateGame;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Getter
@@ -19,9 +20,10 @@ public class WebModel {
     private Boolean playingWithBot;
     private StateGame stateGame;
     private Boolean gameOver;
+    private LocalDate createDate;
 
     @Builder
-    public WebModel(UUID uuidGame, UUID firstPlayer_X, UUID secondPlayer_O, boolean playingWithBot, StateGame stateGame, Boolean gameOver) {
+    public WebModel(UUID uuidGame, UUID firstPlayer_X, UUID secondPlayer_O, boolean playingWithBot, StateGame stateGame, Boolean gameOver,LocalDate createDate) {
         field = new int[3][3];
         this.uuidGame = uuidGame;
         FirstPlayer_X = firstPlayer_X;
@@ -29,5 +31,6 @@ public class WebModel {
         this.playingWithBot = playingWithBot;
         this.stateGame = stateGame;
         this.gameOver = gameOver;
+        this.createDate = createDate;
     }
 }

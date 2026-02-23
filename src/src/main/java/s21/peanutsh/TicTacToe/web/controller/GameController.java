@@ -1,26 +1,27 @@
 package s21.peanutsh.TicTacToe.web.controller;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import s21.peanutsh.TicTacToe.domain.service.ServiceGame;
+import s21.peanutsh.TicTacToe.domain.service.GameService;
 import s21.peanutsh.TicTacToe.web.model.WebModel;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Logger;
 
+
+@Slf4j
 @RestController
-public class Controller {
-    private static final Logger logger = Logger.getLogger(Controller.class.getName());
-    private final ServiceGame service;
+public class GameController {
+    private final GameService gameService;
 
-
-    public Controller(ServiceGame service) {
-        this.service = service;
+    public GameController(GameService gameService) {
+        this.gameService = gameService;
     }
+
 
     @PostMapping("/game/{uuidGame}")
     public ResponseEntity<?> update(
@@ -29,17 +30,17 @@ public class Controller {
     ) {
 
         try {
-            service.isValidityGame(uuidGame,
+            gameService.isValidityGame(uuidGame,
                     (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal(),
                     webModel);
             return ResponseEntity.
                     ok(
-                            service.update(webModel,
+                            gameService.update(webModel,
                                     (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal()
                             ));
 
         } catch (Exception e) {
-            logger.info(e.getMessage());
+            log.info(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
 
         }
@@ -52,7 +53,7 @@ public class Controller {
     public ResponseEntity<?> pullAvailableGames() {
 
 
-        var list = service.getAvailableGames(
+        var list = gameService.getAvailableGames(
                 (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal()
         );
         if (list.isEmpty()) {
@@ -69,7 +70,7 @@ public class Controller {
     public ResponseEntity<?> addGame(
             @RequestBody boolean bot
     ) {
-        return ResponseEntity.ok(service.createGame(bot));
+        return ResponseEntity.ok(gameService.createGame(bot));
     }
 
     //присоединение к игре
@@ -79,7 +80,7 @@ public class Controller {
             @RequestBody Integer position
     ) {
         try {
-            service.joinToGame((UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal(), uuidGame, position);
+            gameService.joinToGame((UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal(), uuidGame, position);
 
         } catch (Exception exception) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
@@ -93,7 +94,7 @@ public class Controller {
             @PathVariable UUID uuidGame
     ) {
         try {
-            return ResponseEntity.ok(service.getCurrentModel(
+            return ResponseEntity.ok(gameService.getCurrentModel(
                     (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal(),
                     uuidGame
             ));
@@ -108,7 +109,7 @@ public class Controller {
     public ResponseEntity<List<?>> getAllGames(
     ) {
         try {
-            return ResponseEntity.ok(service.getAllCurrentGames(
+            return ResponseEntity.ok(gameService.getAllCurrentGames(
                     (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal()
             ));
 
@@ -116,6 +117,33 @@ public class Controller {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
+
+    // получение всех завершенных игр по uuid пользователя
+    @PostMapping("/game/game_over/{uuid}")
+    public ResponseEntity<?> getAllOverGamesForUser(
+            @RequestHeader UUID uuid
+
+    ){
+        try {
+           return ResponseEntity.ok(gameService.getAllOverGamesForUser(uuid));
+        }catch (Exception e){
+            return ResponseEntity.ok(e.getMessage());
+        }
+    }
+
+
+    // получение всех завершенных игр
+    @PostMapping("/game/game_over")
+    public ResponseEntity<?> getAllOverGames(
+
+    ){
+        try {
+            return ResponseEntity.ok(gameService.getAllOverGames());
+        }catch (Exception e ){
+            return ResponseEntity.ok(e.getMessage());
+        }
+    }
+
 
 
 }

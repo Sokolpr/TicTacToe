@@ -13,7 +13,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @ToString
-public class EntityModel {
+public class ModelEntity {
 
     @Id
     @Column(unique = true, nullable = false)
@@ -28,7 +28,7 @@ public class EntityModel {
 
 
     @Builder
-public EntityModel(UUID uuidGame, String field, Boolean bot, UUID firstPlayer, UUID secondPlayer, StateGame stateGame, boolean gameOver) {
+public ModelEntity(UUID uuidGame, String field, Boolean bot, UUID firstPlayer, UUID secondPlayer, StateGame stateGame, boolean gameOver) {
         this.uuidGame = uuidGame;
         this.field = field;
         this.bot = bot;

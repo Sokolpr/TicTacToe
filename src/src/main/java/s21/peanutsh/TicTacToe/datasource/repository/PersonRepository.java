@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface PersonRepository extends CrudRepository<UserEntity, Long> {
+public interface PersonRepository extends CrudRepository<UserEntity, UUID> {
 
     Optional<UserEntity> findByLogin(String login);
 

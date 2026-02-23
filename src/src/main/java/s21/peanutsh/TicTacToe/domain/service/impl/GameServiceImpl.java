@@ -1,12 +1,13 @@
-package s21.peanutsh.TicTacToe.domain.service;
+package s21.peanutsh.TicTacToe.domain.service.impl;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import s21.peanutsh.TicTacToe.datasource.mapper.Mapper;
+import s21.peanutsh.TicTacToe.datasource.mapper.ModelEntityMapper;
 import s21.peanutsh.TicTacToe.datasource.repository.ModelRepository;
 import s21.peanutsh.TicTacToe.domain.model.Model;
 import s21.peanutsh.TicTacToe.domain.model.StateGame;
-import s21.peanutsh.TicTacToe.web.controller.Controller;
+import s21.peanutsh.TicTacToe.domain.service.GameService;
 import s21.peanutsh.TicTacToe.web.mapper.GameMapper;
 import s21.peanutsh.TicTacToe.web.model.WebModel;
 
@@ -14,14 +15,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.logging.Logger;
 
+@Slf4j
 @org.springframework.stereotype.Service
-public class ServiceGame implements IChangeGame {
-    private static final Logger logger = Logger.getLogger(Controller.class.getName());
+public class GameServiceImpl implements GameService {
 
     @Autowired
-    private ModelRepository repositoryModel;
+    private ModelRepository modelRepository;
 
 
     // Детальное логирование для отладки
@@ -38,6 +38,7 @@ public class ServiceGame implements IChangeGame {
 //        }
 
 
+    @Override
     //ход компьютера
     public void generateComputerMove(Model model) {
         if (model.getGameOver()) {
@@ -68,7 +69,6 @@ public class ServiceGame implements IChangeGame {
         }
         model.moveComputer(bestMove % 3, bestMove / 3);
     }
-
     //реализация min/max
     private int minMax(Model model, int deep, boolean isBot) {
         if (model.getGameOver()) {
@@ -103,24 +103,25 @@ public class ServiceGame implements IChangeGame {
         return bestScore;
     }
 
-
+    @Override
     //создание игры
     public UUID createGame(boolean playingWithComputer) {
 
         Model model = new Model(playingWithComputer);
-        repositoryModel.save(Mapper.convertModelToEntity(model));
+        modelRepository.save(ModelEntityMapper.convertModelToEntity(model));
         return model.getUuidGame();
     }
 
+    @Override
 
     //подключение к игре
     public void joinToGame(UUID uuidUser, UUID uuidGame, Integer position) throws Exception {
-        var entityModel = repositoryModel.findByUuidGameAndStateGame(uuidGame, StateGame.WAITING_PLAYERS);
+        var entityModel = modelRepository.findByUuidGameAndStateGame(uuidGame, StateGame.WAITING_PLAYERS);
         if (entityModel.isEmpty()) {
             throw new Exception("невозможно подключиться");
         }
 
-        var model = Mapper.convertEntityToModel(entityModel.get());
+        var model = ModelEntityMapper.convertEntityToModel(entityModel.get());
         if (model.getStateGame() != StateGame.WAITING_PLAYERS) {
             throw new Exception("невозможно подключиться, игра уже идет");
         }
@@ -156,58 +157,87 @@ public class ServiceGame implements IChangeGame {
                 model.setStateGame(StateGame.TURN_SECOND_PLAYER);
             }
         }
-        var toEntity = Mapper.convertModelToEntity(model);
-        repositoryModel.save(toEntity);
+        var toEntity = ModelEntityMapper.convertModelToEntity(model);
+        modelRepository.save(toEntity);
     }
 
+    @Override
 
     //получение текущей игры
     public WebModel getCurrentModel(UUID uuidUser, UUID uuidGame) throws Exception {
-        var game = repositoryModel.findByUuidGameAndUuidUser(uuidGame, uuidUser);
+        var game = modelRepository.findByUuidGameAndUuidUser(uuidGame, uuidUser);
         if (game.isEmpty()) {
             throw new Exception("такой игры не существует");
         }
 
         return GameMapper.convertDomainToWeb(
-                Mapper.convertEntityToModel(game.get())
+                ModelEntityMapper.convertEntityToModel(game.get())
         );
     }
 
+    @Override
 
     //получение всех доступных игр
     public List<WebModel> getAvailableGames(UUID uuidUser) {
-        return repositoryModel.findGames(
+        return modelRepository.findGames(
                         StateGame.WAITING_PLAYERS, uuidUser
                 )
                 .stream()
-                .map(Mapper::convertEntityToModel)
+                .map(ModelEntityMapper::convertEntityToModel)
                 .map(GameMapper::convertDomainToWeb)
                 .toList();
     }
 
 
+    @Override
+
     //получение всех текущих игр
     public List<UUID> getAllCurrentGames(UUID uuidUser) throws Exception {
-        var list = repositoryModel.findCurrentGamesForUser(false, uuidUser);
+        var list = modelRepository.findCurrentGamesForUser(false, uuidUser);
         if (list.isEmpty()) {
             throw new Exception("нет текущих игр");
         }
 
-        return list.stream().map(Mapper::convertEntityToModel)
+        return list.stream().map(ModelEntityMapper::convertEntityToModel)
                 .map(GameMapper::convertDomainToWeb)
                 .map(a -> ((WebModel) a).getUuidGame())
                 .toList();
     }
 
+    @Override
+    public List<WebModel> getAllOverGames() throws Exception{
+        var list= modelRepository.findByGameOverTrue();
+        if (list.isEmpty()){
+            throw new Exception("нет завершенных игр");
+        }
+        return list.stream()
+                .map(ModelEntityMapper::convertEntityToModel)
+                .map(GameMapper::convertDomainToWeb)
+                .toList();
+    }
+    @Override
+    // получение всех завершенных игр для пользователя
+    public List<WebModel> getAllOverGamesForUser(UUID uuidUser) throws Exception {
+       var list = modelRepository.findEndGameForUser(uuidUser);
+        if (list.isEmpty()){
+            throw new Exception("нет завершенных игр");
+        }
+        return list.stream()
+                .map(ModelEntityMapper::convertEntityToModel)
+                .map(GameMapper::convertDomainToWeb)
+                .toList();
+    }
+
+
 
     //проверка, существует ли такая игра
     public void isValidityGame(UUID uuidGame, UUID uuidUser, WebModel webModel) throws Exception {
-        var entity = repositoryModel.findByUuidGame(uuidGame);
+        var entity = modelRepository.findByUuidGame(uuidGame);
         if (entity.isEmpty()) {
             throw new Exception("такой игры не существует");
         }
 
-        var model = Mapper.convertEntityToModel(entity.get());
+        var model = ModelEntityMapper.convertEntityToModel(entity.get());
 
 
         if (!Objects.equals(uuidUser, model.getFirstPlayer()) && !Objects.equals(uuidUser, model.getSecondPlayer())) {
@@ -223,24 +253,25 @@ public class ServiceGame implements IChangeGame {
         }
 
         for (int l = 0; l < 3; l++) {
-            logger.info(Arrays.toString(model.getField()[l]));
+            log.info(Arrays.toString(model.getField()[l]));
         }
         if (model.getGameOver()) {
             throw new RuntimeException("Игра закончилась");
         }
         Model convertedModel = GameMapper.convertWebToDomain(webModel);
 
-        if (!model.isValidityChange(convertedModel, uuidUser)) {
-            logger.warning("Валидация не пройдена!");
+        if (model.inValidityChange(convertedModel, uuidUser)) {
+            log.warn("Валидация не пройдена!");
             throw new RuntimeException("Не корректные данные");
         } else {
-            logger.info("Валидация пройдена успешно");
+            log.info("Валидация пройдена успешно");
         }
 
 
     }
 
-
+    @Override
+    //Обновление поля
     public WebModel update(WebModel webModel, UUID uuidUser) {
         //получили поле
         var model = GameMapper.convertWebToDomain(webModel);
@@ -261,8 +292,8 @@ public class ServiceGame implements IChangeGame {
         }
 
 
-        var toEntity = Mapper.convertModelToEntity(model);
-        repositoryModel.save(toEntity);
+        var toEntity = ModelEntityMapper.convertModelToEntity(model);
+        modelRepository.save(toEntity);
 
         return GameMapper.convertDomainToWeb(model);
 

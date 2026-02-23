@@ -3,7 +3,6 @@ package s21.peanutsh.TicTacToe.domain.model;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -174,33 +173,33 @@ public class Model {
         return false;
     }
 
-    public boolean isValidityChange(Model model, UUID uuidUser) {
+    public boolean inValidityChange(Model model, UUID uuidUser) {
         if (model == null) {
-            return false;
+            return true;
         }
 
         if (!Objects.equals(uuidGame, model.getUuidGame())) {
-            return false;
+            return true;
         }
 
         if (stateGame != model.getStateGame()) {
-            return false;
+            return true;
         }
 
         if (!Objects.equals(firstPlayer, model.getFirstPlayer())) {
-            return false;
+            return true;
         }
 
         if (!Objects.equals(secondPlayer, model.getSecondPlayer())) {
-            return false;
+            return true;
         }
 
         if (gameOver != model.getGameOver()) {
-            return false;
+            return true;
         }
 
         if (playingWithComputer != model.getPlayingWithComputer()) {
-            return false;
+            return true;
         }
 
 
@@ -214,19 +213,19 @@ public class Model {
                     if (model.getField()[i][j] == detectUser(uuidUser)) {
                         change++;
                     } else {
-                        return false;
+                        return true;
                     }
                 } else if (field[i][j] == 1 || field[i][j] == 2) {
                     if (field[i][j] != model.getField()[i][j]) {
-                        return false;
+                        return true;
                     }
                 } else {
-                    return false;
+                    return true;
                 }
             }
         }
 
-        return change == 1;
+        return change != 1;
     }
 
 

@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class UserMapper {
+public class UserEntityMapper {
 
     public static UserEntity userToEntity(User user){
         return UserEntity.builder()

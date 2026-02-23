@@ -15,7 +15,7 @@ import s21.peanutsh.TicTacToe.domain.service.AuthFilter;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-public class ConfigurationAuth {
+public class AuthConfiguration {
     private final AuthFilter authFilter;
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

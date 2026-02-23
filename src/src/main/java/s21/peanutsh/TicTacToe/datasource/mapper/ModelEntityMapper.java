@@ -1,11 +1,11 @@
 package s21.peanutsh.TicTacToe.datasource.mapper;
 
 import org.json.JSONArray;
-import s21.peanutsh.TicTacToe.datasource.model.EntityModel;
+import s21.peanutsh.TicTacToe.datasource.model.ModelEntity;
 import s21.peanutsh.TicTacToe.domain.model.Model;
 
 
-public class Mapper {
+public class ModelEntityMapper {
 
 
     private static String converterFieldToJSJON(int[][] field) {
@@ -34,8 +34,8 @@ public class Mapper {
     }
 
 
-    public static EntityModel convertModelToEntity(Model model) {
-        return EntityModel.builder()
+    public static ModelEntity convertModelToEntity(Model model) {
+        return ModelEntity.builder()
                 .uuidGame(model.getUuidGame())
                 .field(converterFieldToJSJON(model.getField()))
                 .bot(model.getPlayingWithComputer())
@@ -47,15 +47,15 @@ public class Mapper {
     }
 
 
-    public static Model convertEntityToModel(EntityModel entityModel) {
+    public static Model convertEntityToModel(ModelEntity modelEntity) {
         return Model.builder()
-                .uuidGame(entityModel.getUuidGame())
-                .field(converterStringToField(entityModel.getField()))
-                .firstPlayer(entityModel.getFirstPlayer())
-                .secondPlayer(entityModel.getSecondPlayer())
-                .stateGame(entityModel.getStateGame())
-                .playingWithComputer(entityModel.getBot())
-                .gameOver(entityModel.getGameOver())
+                .uuidGame(modelEntity.getUuidGame())
+                .field(converterStringToField(modelEntity.getField()))
+                .firstPlayer(modelEntity.getFirstPlayer())
+                .secondPlayer(modelEntity.getSecondPlayer())
+                .stateGame(modelEntity.getStateGame())
+                .playingWithComputer(modelEntity.getBot())
+                .gameOver(modelEntity.getGameOver())
                 .build();
     }
 

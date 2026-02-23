@@ -8,10 +8,11 @@ import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 import s21.peanutsh.TicTacToe.datasource.model.TokenEntity;
 import s21.peanutsh.TicTacToe.datasource.repository.TokenRepository;
 import s21.peanutsh.TicTacToe.domain.service.AuthService;
+import s21.peanutsh.TicTacToe.domain.service.JwtProvider;
+import s21.peanutsh.TicTacToe.domain.service.UserService;
 import s21.peanutsh.TicTacToe.web.mapper.PersonMapper;
 import s21.peanutsh.TicTacToe.web.model.*;
 
@@ -20,35 +21,35 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-    private final PasswordEncoder passwordEncoder;
-    private final UserServiceImpl userServiceImpl;
-    private final JwtProviderImpl jwtProviderImpl;
-    private final TokenRepository tokenRepository;
 
+    private final JwtProvider jwtProvider;
+    private final UserService userService;
+    private final TokenRepository tokenRepository;
+    private final PasswordEncoder passwordEncoder;
 
 
     @Override
     public void registration(SignUpRequest signUpRequest) throws AuthorizationDeniedException {
-        userServiceImpl.signUp(signUpRequest);
+        userService.signUp(signUpRequest);
     }
 
     @Override
     public JWTResponse updateAccessToken(String refresh) throws Exception {
-        return updateToken(refresh,"access");
+        return updateToken(refresh, "access");
     }
 
     @Override
     public JWTResponse updateRefreshToken(String refresh) throws Exception {
-        return updateToken(refresh,"refresh");
+        return updateToken(refresh, "refresh");
     }
 
 
     @Override
     public JWTResponse login(JWTRequest jwtRequest) throws Exception {
-        var user = userServiceImpl.loadUserByUsername(jwtRequest.getLogin());
-        if (passwordEncoder.matches(jwtRequest.getPassword(), user.getPassword())){
-            var access= jwtProviderImpl.generationAccessToken(user);
-            var refresh = jwtProviderImpl.generationRefreshToken(user);
+        var user = userService.loadUserByUsername(jwtRequest.getLogin());
+        if (passwordEncoder.matches(jwtRequest.getPassword(), user.getPassword())) {
+            var access = jwtProvider.generationAccessToken(user);
+            var refresh = jwtProvider.generationRefreshToken(user);
             tokenRepository.save(
                     TokenEntity.builder()
                             .token(refresh)
@@ -60,34 +61,34 @@ public class AuthServiceImpl implements AuthService {
                     .accessToken(access)
                     .refreshToken(refresh)
                     .build();
-        }else {
+        } else {
             throw new Exception("invalid password");
         }
     }
 
     @Override
     public WebPerson getUserByUuid(UUID uuidUser) throws UsernameNotFoundException {
-        var user = userServiceImpl.getByUuid(uuidUser);
+        var user = userService.getByUuid(uuidUser);
         return PersonMapper.entityToWeb(user.getLogin(), uuidUser);
     }
 
     @Override
-    public JwtAuthentication getAuth(){
-       return (JwtAuthentication) SecurityContextHolder.getContext().getAuthentication();
+    public JwtAuthentication getAuth() {
+        return (JwtAuthentication) SecurityContextHolder.getContext().getAuthentication();
     }
 
 
-    private JWTResponse updateToken(String refreshToken,String typeToken)throws Exception {
-        var refresh  = refreshToken;
-        if (jwtProviderImpl.validateRefreshToken(refresh)) {
-            Claims claims = jwtProviderImpl.getRefreshClaims(refresh);
+    private JWTResponse updateToken(String refreshToken, String typeToken) throws Exception {
+        var refresh = refreshToken;
+        if (jwtProvider.validateRefreshToken(refresh)) {
+            Claims claims = jwtProvider.getRefreshClaims(refresh);
             UUID uuidUser = (UUID) claims.get("uuid");
             String storeToken = tokenRepository.findByUuid(uuidUser).orElseThrow(() -> new Exception("пользователь не найден")).getToken();
             if (refresh.equals(storeToken)) {
-                var user=  userServiceImpl.getByUuid(uuidUser);
-                String updateAccessToken = jwtProviderImpl.generationAccessToken(user);
-                if (typeToken.equals("refresh")){
-                    refresh = jwtProviderImpl.generationRefreshToken(user);
+                var user = userService.getByUuid(uuidUser);
+                String updateAccessToken = jwtProvider.generationAccessToken(user);
+                if (typeToken.equals("refresh")) {
+                    refresh = jwtProvider.generationRefreshToken(user);
                     tokenRepository.save(TokenEntity.builder().token(refresh).uuid(user.getUuid()).build());
                 }
                 return JWTResponse.builder()
@@ -101,14 +102,13 @@ public class AuthServiceImpl implements AuthService {
 
 
     @Override
-    public WebPerson getUserByAccessToken(@NonNull String token) throws UsernameNotFoundException , JwtException {
-        if (jwtProviderImpl.validateAccessToken(token)){
-            var claims = jwtProviderImpl.getAccessClaims(token);
-            var user = userServiceImpl.getByUuid((UUID) claims.get("uuid"));
-            return PersonMapper.entityToWeb(user.getLogin(),user.getUuid());
-        }
-        else {
-            throw  new JwtException("invalid token");
+    public WebPerson getUserByAccessToken(@NonNull String token) throws UsernameNotFoundException, JwtException {
+        if (jwtProvider.validateAccessToken(token)) {
+            var claims = jwtProvider.getAccessClaims(token);
+            var user = userService.getByUuid((UUID) claims.get("uuid"));
+            return PersonMapper.entityToWeb(user.getLogin(), user.getUuid());
+        } else {
+            throw new JwtException("invalid token");
         }
 
     }

@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Component
+
 public interface JwtUtil {
-    public  JwtAuthentication generate(Claims claims);
+      JwtAuthentication generate(Claims claims);
 }

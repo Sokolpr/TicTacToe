@@ -1,7 +1,6 @@
 package s21.peanutsh.TicTacToe.web.model;
 
 import lombok.*;
-import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 

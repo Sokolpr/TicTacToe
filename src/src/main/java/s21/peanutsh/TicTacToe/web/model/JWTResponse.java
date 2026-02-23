@@ -1,6 +1,5 @@
 package s21.peanutsh.TicTacToe.web.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;

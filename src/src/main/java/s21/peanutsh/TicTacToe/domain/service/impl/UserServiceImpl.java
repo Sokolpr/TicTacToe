@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 import s21.peanutsh.TicTacToe.datasource.mapper.UserEntityMapper;
 import s21.peanutsh.TicTacToe.datasource.repository.PersonRepository;
 import s21.peanutsh.TicTacToe.domain.model.Role;
@@ -16,7 +15,6 @@ import java.util.Set;
 import java.util.UUID;
 
 
-@Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 

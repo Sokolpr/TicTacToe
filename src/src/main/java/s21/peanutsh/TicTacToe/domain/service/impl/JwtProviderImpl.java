@@ -6,8 +6,6 @@ import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import s21.peanutsh.TicTacToe.domain.model.User;
 import s21.peanutsh.TicTacToe.domain.service.JwtProvider;
 
@@ -16,7 +14,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Slf4j
-@Component
 public class JwtProviderImpl implements JwtProvider {
 
     private final SecretKey accessSecret;
@@ -25,10 +22,10 @@ public class JwtProviderImpl implements JwtProvider {
     private final SecretKey refreshSecret;
 
 
-    public JwtProviderImpl(@Value("${secretAccess}") String accessSecret,
-                           @Value("${lifeTimeAccess}") Integer lifeTimeAccess,
-                           @Value("${secretRefresh}") String refreshSecret,
-                           @Value("${lifeTimeRefresh}") Integer lifeTimeRefresh) {
+    public JwtProviderImpl(String accessSecret,
+                           Integer lifeTimeAccess,
+                           String refreshSecret,
+                           Integer lifeTimeRefresh) {
         this.accessSecret = Keys.hmacShaKeyFor(accessSecret.getBytes(StandardCharsets.UTF_8));
         this.refreshSecret = Keys.hmacShaKeyFor(refreshSecret.getBytes(StandardCharsets.UTF_8));
         this.lifeTimeAccess = lifeTimeAccess;

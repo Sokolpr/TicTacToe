@@ -2,7 +2,6 @@ package s21.peanutsh.TicTacToe.domain.service.impl;
 
 
 import io.jsonwebtoken.Claims;
-import org.springframework.stereotype.Component;
 import s21.peanutsh.TicTacToe.domain.model.Role;
 import s21.peanutsh.TicTacToe.domain.service.JwtUtil;
 import s21.peanutsh.TicTacToe.web.model.JwtAuthentication;
@@ -12,7 +11,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Component
 public class JwtUtilImpl implements JwtUtil {
     @Override
     public  JwtAuthentication generate(Claims claims){

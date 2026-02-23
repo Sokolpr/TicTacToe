@@ -1,6 +1,7 @@
 package s21.peanutsh.TicTacToe.web.controller;
 
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,15 +18,9 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
+@RequiredArgsConstructor
 public class AuthController {
-
-
-
     private final AuthService authService;
-
-    public AuthController(AuthService authService) {
-        this.authService = authService;
-    }
 
 
     //регистрация
@@ -61,24 +56,23 @@ public class AuthController {
 
     @PostMapping("auth/update/access")
     ResponseEntity<?> updateAccess(
-            @RequestBody RefreshJwtRequest refreshJwtRequest){
+            @RequestBody RefreshJwtRequest refreshJwtRequest) {
         try {
             return ResponseEntity.ok(authService.updateAccessToken(refreshJwtRequest.getRefreshToken()));
-        }catch (Exception exception){
+        } catch (Exception exception) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
         }
     }
 
     @PostMapping("auth/update/refresh")
     ResponseEntity<?> updateRefresh(
-            @RequestBody RefreshJwtRequest refreshJwtRequest){
+            @RequestBody RefreshJwtRequest refreshJwtRequest) {
         try {
             return ResponseEntity.ok(authService.updateRefreshToken(refreshJwtRequest.getRefreshToken()));
-        }catch (Exception exception){
+        } catch (Exception exception) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
         }
     }
-
 
 
     @PostMapping("/user/{uuidUser}")

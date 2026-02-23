@@ -7,14 +7,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
-import s21.peanutsh.TicTacToe.domain.service.impl.JwtProviderImpl;
 
 import java.io.IOException;
 
 
 @Slf4j
-@Component
 @RequiredArgsConstructor
 public class AuthFilter extends GenericFilter {
     private final JwtProvider jwtProvider;

@@ -1,8 +1,8 @@
 package s21.peanutsh.TicTacToe.domain.service.impl;
 
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import s21.peanutsh.TicTacToe.datasource.mapper.ModelEntityMapper;
 import s21.peanutsh.TicTacToe.datasource.repository.ModelRepository;
 import s21.peanutsh.TicTacToe.domain.model.Model;
@@ -17,11 +17,10 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
-@org.springframework.stereotype.Service
+@RequiredArgsConstructor
 public class GameServiceImpl implements GameService {
 
-    @Autowired
-    private ModelRepository modelRepository;
+    private final ModelRepository modelRepository;
 
 
     // Детальное логирование для отладки

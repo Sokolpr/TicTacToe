@@ -43,6 +43,7 @@ public class ModelEntityMapper {
                 .secondPlayer(model.getSecondPlayer())
                 .stateGame(model.getStateGame())
                 .gameOver(model.getGameOver())
+                .createDate(model.getCreateDate())
                 .build();
     }
 
@@ -56,6 +57,7 @@ public class ModelEntityMapper {
                 .stateGame(modelEntity.getStateGame())
                 .playingWithComputer(modelEntity.getBot())
                 .gameOver(modelEntity.getGameOver())
+                .createDate(modelEntity.getCreateDate())
                 .build();
     }
 

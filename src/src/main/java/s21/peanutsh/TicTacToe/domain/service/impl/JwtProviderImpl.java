@@ -81,6 +81,8 @@ public class JwtProviderImpl implements JwtProvider {
             log.error("Malformed jwt", mjEx);
         } catch (SignatureException sEx) {
             log.error("Invalid signature", sEx);
+        } catch (ExpiredJwtException e){
+            log.error("Токен истек");
         } catch (Exception e) {
             log.error("invalid token", e);
         }

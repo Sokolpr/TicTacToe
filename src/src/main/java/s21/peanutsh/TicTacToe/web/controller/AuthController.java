@@ -9,7 +9,6 @@ import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import s21.peanutsh.TicTacToe.domain.service.AuthService;
-import s21.peanutsh.TicTacToe.domain.service.impl.AuthServiceImpl;
 import s21.peanutsh.TicTacToe.web.model.JWTRequest;
 import s21.peanutsh.TicTacToe.web.model.RefreshJwtRequest;
 import s21.peanutsh.TicTacToe.web.model.SignUpRequest;
@@ -32,7 +31,7 @@ public class AuthController {
             return ResponseEntity.ok("Пользователь зарегистрирован");
 
         } catch (AuthorizationDeniedException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Такой пользователь уже существует");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
@@ -87,12 +86,10 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/user/my_profile")
-    ResponseEntity<String> getUserByUuid(
-            @RequestBody String token
-    ) {
+    @PostMapping("/user/my")
+    ResponseEntity<String> getMyProfile() {
         try {
-            var user = authService.getUserByAccessToken(token);
+            var user = authService.getUserByUuid(authService.getAuth().getUuid());
             return ResponseEntity.ok(user.toString());
         } catch (UsernameNotFoundException exception) {
             return ResponseEntity.ok("Пользователь не найден");

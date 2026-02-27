@@ -11,6 +11,7 @@ import s21.peanutsh.TicTacToe.domain.model.User;
 import s21.peanutsh.TicTacToe.domain.service.UserService;
 import s21.peanutsh.TicTacToe.web.model.SignUpRequest;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -30,9 +31,11 @@ public class UserServiceImpl implements UserService {
                 .login(signUpRequest.getLogin())
                 .password(passwordEncoder.encode(signUpRequest.getPassword()))
                 .roles(Set.of(Role.USER))
+                .uuid(UUID.randomUUID())
                 .build()));
 
     }
+
     @Override
     public User loadUserByUsername(String login) throws Exception {
         return UserEntityMapper.entityToUser(
@@ -40,12 +43,15 @@ public class UserServiceImpl implements UserService {
                         .orElseThrow(
                                 () -> new Exception("Такого пользователя не существует")));
     }
+
     @Override
     public User getByUuid(UUID uuidUser) throws UsernameNotFoundException {
         return UserEntityMapper.entityToUser(
                 personRepository.findByUuid(uuidUser).orElseThrow(() -> new UsernameNotFoundException("Пользователь не существует")));
     }
 
-
-
+    @Override
+    public List<UUID> getAllPlayers() {
+        return personRepository.getAllUuid();
+    }
 }

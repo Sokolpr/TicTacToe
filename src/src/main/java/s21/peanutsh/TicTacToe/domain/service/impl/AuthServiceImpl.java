@@ -1,8 +1,6 @@
 package s21.peanutsh.TicTacToe.domain.service.impl;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -82,7 +80,7 @@ public class AuthServiceImpl implements AuthService {
         var refresh = refreshToken;
         if (jwtProvider.validateRefreshToken(refresh)) {
             Claims claims = jwtProvider.getRefreshClaims(refresh);
-            UUID uuidUser = (UUID) claims.get("uuid");
+            UUID uuidUser = UUID.fromString((String) claims.get("uuid"));
             String storeToken = tokenRepository.findByUuid(uuidUser).orElseThrow(() -> new Exception("пользователь не найден")).getToken();
             if (refresh.equals(storeToken)) {
                 var user = userService.getByUuid(uuidUser);
@@ -98,19 +96,6 @@ public class AuthServiceImpl implements AuthService {
             }
         }
         throw new Exception("не валидный jwt");
-    }
-
-
-    @Override
-    public WebPerson getUserByAccessToken(@NonNull String token) throws UsernameNotFoundException, JwtException {
-        if (jwtProvider.validateAccessToken(token)) {
-            var claims = jwtProvider.getAccessClaims(token);
-            var user = userService.getByUuid((UUID) claims.get("uuid"));
-            return PersonMapper.entityToWeb(user.getLogin(), user.getUuid());
-        } else {
-            throw new JwtException("invalid token");
-        }
-
     }
 
 

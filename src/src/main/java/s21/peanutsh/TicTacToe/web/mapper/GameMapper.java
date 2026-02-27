@@ -3,7 +3,6 @@ package s21.peanutsh.TicTacToe.web.mapper;
 import s21.peanutsh.TicTacToe.domain.model.Model;
 import s21.peanutsh.TicTacToe.web.model.WebModel;
 
-import java.util.UUID;
 
 public class GameMapper {
 

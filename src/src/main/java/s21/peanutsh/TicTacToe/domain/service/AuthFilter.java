@@ -26,7 +26,7 @@ public class AuthFilter extends GenericFilter {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         String requestURI = request.getRequestURI();
-        if (requestURI.startsWith("/auth/login") || requestURI.startsWith("/auth/signup")||requestURI.startsWith("/auth/update/access")) {
+        if (requestURI.startsWith("/auth/login") || requestURI.startsWith("/auth/signup") || requestURI.startsWith("/auth/update/access")) {
             filterChain.doFilter(request, response);// отправляем запрос следующему фильтру
             return;
 
@@ -42,8 +42,8 @@ public class AuthFilter extends GenericFilter {
                     var auth = jwtUtil.generate(claims);
                     auth.setAuthenticated(true);
                     SecurityContextHolder.getContext().setAuthentication(auth);
-                    filterChain.doFilter(request,response);
-                }else {
+                    filterChain.doFilter(request, response);
+                } else {
                     throw new SecurityException("Missing Authorization header");
                 }
 

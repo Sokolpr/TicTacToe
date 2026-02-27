@@ -1,7 +1,5 @@
 package s21.peanutsh.TicTacToe.domain.service;
 
-import io.jsonwebtoken.JwtException;
-import lombok.NonNull;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import s21.peanutsh.TicTacToe.web.model.*;
@@ -24,9 +22,6 @@ public interface AuthService {
     WebPerson getUserByUuid(UUID uuidUser) throws UsernameNotFoundException;
 
     JwtAuthentication getAuth();
-
-
-    WebPerson getUserByAccessToken(@NonNull String token) throws UsernameNotFoundException, JwtException;
 
 
 }

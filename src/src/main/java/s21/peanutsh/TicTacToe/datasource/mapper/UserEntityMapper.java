@@ -11,15 +11,16 @@ import java.util.stream.Collectors;
 
 public class UserEntityMapper {
 
-    public static UserEntity userToEntity(User user){
+    public static UserEntity userToEntity(User user) {
         return UserEntity.builder()
                 .login(user.getLogin())
                 .password(user.getPassword())
                 .roles(convertToDatabaseColumn(user.getRoles()))
+                .uuid(user.getUuid())
                 .build();
     }
 
-    public static User entityToUser(UserEntity userEntity){
+    public static User entityToUser(UserEntity userEntity) {
         return User.builder()
                 .login(userEntity.getLogin())
                 .password(userEntity.getPassword())
@@ -33,6 +34,6 @@ public class UserEntityMapper {
     }
 
     private static Set<Role> convertToEntityAttribute(String s) {
-        return  Arrays.stream(s.split(",")).map(Role::valueOf).collect(Collectors.toSet());
+        return Arrays.stream(s.split(",")).map(Role::valueOf).collect(Collectors.toSet());
     }
 }

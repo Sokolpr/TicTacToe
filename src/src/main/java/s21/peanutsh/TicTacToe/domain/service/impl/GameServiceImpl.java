@@ -8,43 +8,26 @@ import s21.peanutsh.TicTacToe.datasource.repository.ModelRepository;
 import s21.peanutsh.TicTacToe.domain.model.Model;
 import s21.peanutsh.TicTacToe.domain.model.StateGame;
 import s21.peanutsh.TicTacToe.domain.service.GameService;
+import s21.peanutsh.TicTacToe.domain.service.UserService;
 import s21.peanutsh.TicTacToe.web.mapper.GameMapper;
 import s21.peanutsh.TicTacToe.web.model.WebModel;
+import s21.peanutsh.TicTacToe.web.model.WinModel;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @RequiredArgsConstructor
 public class GameServiceImpl implements GameService {
 
     private final ModelRepository modelRepository;
+    private final UserService userService;
 
 
-    // Детальное логирование для отладки
-//        logger.info("=== DEBUG isValidityCheck ===");
-//        logger.info("Original model UUID: {}" + model.getUuidGame());
-//        logger.info("Original firstPlayer: {}" + model.getFirstPlayer());
-//        logger.info("Original secondPlayer: {}" + model.getSecondPlayer());
-//        logger.info("Original gameOver: {}" + model.getGameOver());
-//        logger.info("Original playingWithComputer: {}" + model.getPlayingWithComputer());
-//        logger.info("Original stateGame: {}" + model.getStateGame());
-//        logger.info("Original field:");
-//        for (int l = 0; l < 3; l++) {
-//            logger.info(Arrays.toString(model.getField()[l]));
-//        }
-
-
-    @Override
     //ход компьютера
-    public void generateComputerMove(Model model) {
+    private void generateComputerMove(Model model) {
         if (model.getGameOver()) {
             return;
         }
-
-
         int bestScore = -1000000;
         int bestMove = -1;
         for (int i = 0; i < 9; i++) {
@@ -68,6 +51,8 @@ public class GameServiceImpl implements GameService {
         }
         model.moveComputer(bestMove % 3, bestMove / 3);
     }
+
+
     //реализация min/max
     private int minMax(Model model, int deep, boolean isBot) {
         if (model.getGameOver()) {
@@ -154,6 +139,8 @@ public class GameServiceImpl implements GameService {
             if (position == 2) {
                 generateComputerMove(model);
                 model.setStateGame(StateGame.TURN_SECOND_PLAYER);
+            } else {
+                model.setStateGame(StateGame.TURN_FIRST_PLAYER);
             }
         }
         var toEntity = ModelEntityMapper.convertModelToEntity(model);
@@ -161,7 +148,6 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-
     //получение текущей игры
     public WebModel getCurrentModel(UUID uuidUser, UUID uuidGame) throws Exception {
         var game = modelRepository.findByUuidGameAndUuidUser(uuidGame, uuidUser);
@@ -204,21 +190,9 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public List<WebModel> getAllOverGames() throws Exception{
-        var list= modelRepository.findByGameOverTrue();
-        if (list.isEmpty()){
-            throw new Exception("нет завершенных игр");
-        }
-        return list.stream()
-                .map(ModelEntityMapper::convertEntityToModel)
-                .map(GameMapper::convertDomainToWeb)
-                .toList();
-    }
-    @Override
-    // получение всех завершенных игр для пользователя
-    public List<WebModel> getAllOverGamesForUser(UUID uuidUser) throws Exception {
-       var list = modelRepository.findEndGameForUser(uuidUser);
-        if (list.isEmpty()){
+    public List<WebModel> getAllOverGames() throws Exception {
+        var list = modelRepository.findByGameOverTrue();
+        if (list.isEmpty()) {
             throw new Exception("нет завершенных игр");
         }
         return list.stream()
@@ -227,6 +201,18 @@ public class GameServiceImpl implements GameService {
                 .toList();
     }
 
+    @Override
+    // получение всех завершенных игр для пользователя
+    public List<WebModel> getAllOverGamesForUser(UUID uuidUser) throws Exception {
+        var list = modelRepository.findEndGameForUser(uuidUser);
+        if (list.isEmpty()) {
+            throw new Exception("нет завершенных игр");
+        }
+        return list.stream()
+                .map(ModelEntityMapper::convertEntityToModel)
+                .map(GameMapper::convertDomainToWeb)
+                .toList();
+    }
 
 
     //проверка, существует ли такая игра
@@ -298,4 +284,15 @@ public class GameServiceImpl implements GameService {
 
     }
 
+    @Override
+    public List<WinModel> getBestPlayers(Integer count) {
+
+        if (count <= 0) {
+            return new ArrayList<WinModel>();
+        }
+        var listUser = userService.getAllPlayers();
+        return listUser.stream().map(el -> new WinModel(el, modelRepository.getPercentWinningForUser(el))
+        ).toList().stream().sorted().toList();
+
+    }
 }

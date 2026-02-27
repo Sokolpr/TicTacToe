@@ -13,5 +13,5 @@ import java.util.stream.Collectors;
 
 
 public interface JwtUtil {
-      JwtAuthentication generate(Claims claims);
+    JwtAuthentication generate(Claims claims);
 }

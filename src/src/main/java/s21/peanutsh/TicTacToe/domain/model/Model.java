@@ -31,7 +31,7 @@ public class Model {
         this.playingWithComputer = playingWithComputer;
         stateGame = StateGame.WAITING_PLAYERS;
         gameOver = false;
-        createDate= LocalDate.now();
+        createDate = LocalDate.now();
     }
 
 
@@ -79,11 +79,8 @@ public class Model {
     }
 
     public boolean yourTurn(UUID uuidUser) {
-        if (uuidUser == null || firstPlayer == null || secondPlayer == null) {
-            return false;
-        }
 
-        if (uuidUser.equals(firstPlayer)) {
+        if (Objects.equals(uuidUser, firstPlayer)) {
             return stateGame == StateGame.TURN_FIRST_PLAYER;
         } else if (uuidUser.equals(secondPlayer)) {
             return stateGame == StateGame.TURN_SECOND_PLAYER;
@@ -125,7 +122,7 @@ public class Model {
     }
 
     public void detectNextTurnPlayer(UUID uuidUser) {
-        if (Objects.equals(uuidUser,firstPlayer)) {
+        if (Objects.equals(uuidUser, firstPlayer)) {
             stateGame = StateGame.TURN_SECOND_PLAYER;
         } else {
             stateGame = StateGame.TURN_FIRST_PLAYER;

@@ -5,18 +5,19 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import s21.peanutsh.TicTacToe.domain.model.User;
 import s21.peanutsh.TicTacToe.web.model.SignUpRequest;
 
+import java.util.List;
 import java.util.UUID;
 
 
 public interface UserService {
 
 
-     void signUp(SignUpRequest signUpRequest) throws AuthorizationDeniedException;
+    void signUp(SignUpRequest signUpRequest) throws AuthorizationDeniedException;
 
-     User loadUserByUsername(String login) throws Exception ;
+    User loadUserByUsername(String login) throws Exception;
 
-     User getByUuid(UUID uuidUser) throws UsernameNotFoundException;
+    User getByUuid(UUID uuidUser) throws UsernameNotFoundException;
 
-
+    List<UUID> getAllPlayers();
 
 }

@@ -15,7 +15,7 @@ public class JwtUtilImpl implements JwtUtil {
     @Override
     public  JwtAuthentication generate(Claims claims){
         return JwtAuthentication.builder()
-                .uuid((UUID)claims.get("uuid"))
+                .uuid(UUID.fromString((String) claims.get("uuid")) )
                 .roles(getRoles(claims))
                 .build();
 

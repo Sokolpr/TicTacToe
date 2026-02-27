@@ -55,6 +55,22 @@ public interface ModelRepository extends CrudRepository<ModelEntity, Long> {
 
     Optional<ModelEntity> findByUuidGame(UUID uuidGame);
 
-
+    @Query("WITH game_stats AS (" +
+            "    SELECT COUNT(*) as total_games, " +
+            "           SUM(CASE " +
+            "               WHEN (m.firstPlayer = :uuidUser AND m.stateGame = 'WINNING_FIRST_PLAYER') " +
+            "               OR (m.secondPlayer = :uuidUser AND m.stateGame = 'WINNING_SECOND_PLAYER') " +
+            "               THEN 1 ELSE 0 END) as wins " +
+            "    FROM ModelEntity m " +
+            "    WHERE m.gameOver = true " +
+            "    AND (m.firstPlayer = :uuidUser OR m.secondPlayer = :uuidUser)" +
+            ") " +
+            "SELECT " +
+            "    CASE " +
+            "        WHEN total_games > 0 THEN (wins * 100.0 / total_games) " +
+            "        ELSE 0 " +
+            "    END as win_percentage " +
+            "FROM game_stats")
+    Double getPercentWinningForUser(UUID uuidUser);
 
 }

@@ -23,7 +23,7 @@ public class WebModel {
     private LocalDate createDate;
 
     @Builder
-    public WebModel(UUID uuidGame, UUID firstPlayer_X, UUID secondPlayer_O, boolean playingWithBot, StateGame stateGame, Boolean gameOver,LocalDate createDate) {
+    public WebModel(UUID uuidGame, UUID firstPlayer_X, UUID secondPlayer_O, boolean playingWithBot, StateGame stateGame, Boolean gameOver, LocalDate createDate) {
         field = new int[3][3];
         this.uuidGame = uuidGame;
         FirstPlayer_X = firstPlayer_X;

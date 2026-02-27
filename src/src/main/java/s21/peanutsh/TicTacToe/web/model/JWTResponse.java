@@ -15,6 +15,6 @@ public class JWTResponse {
     public JWTResponse(String accessToken, String refreshToken) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
-        this.type = "Barer";
+        this.type = "Bearer";
     }
 }

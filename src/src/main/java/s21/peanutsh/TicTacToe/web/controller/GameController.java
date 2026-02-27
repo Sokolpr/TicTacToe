@@ -28,7 +28,6 @@ public class GameController {
             @PathVariable UUID uuidGame,
             @RequestBody WebModel webModel
     ) {
-
         try {
             gameService.isValidityGame(uuidGame,
                     (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal(),
@@ -49,10 +48,8 @@ public class GameController {
 
 
     //получение доступных игр
-    @PostMapping("/games")
+    @PostMapping("/game/all")
     public ResponseEntity<?> pullAvailableGames() {
-
-
         var list = gameService.getAvailableGames(
                 (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal()
         );
@@ -61,8 +58,6 @@ public class GameController {
         } else {
             return ResponseEntity.ok(list.toString());
         }
-
-
     }
 
     //создание игры
@@ -119,14 +114,14 @@ public class GameController {
     }
 
     // получение всех завершенных игр по uuid пользователя
-    @PostMapping("/game/game_over/{uuid}")
+    @PostMapping("/game/history")
     public ResponseEntity<?> getAllOverGamesForUser(
-            @RequestHeader UUID uuid
-
-    ){
+    ) {
         try {
-           return ResponseEntity.ok(gameService.getAllOverGamesForUser(uuid));
-        }catch (Exception e){
+            return ResponseEntity.ok(gameService.getAllOverGamesForUser(
+                    (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal()
+            ));
+        } catch (Exception e) {
             return ResponseEntity.ok(e.getMessage());
         }
     }
@@ -136,14 +131,13 @@ public class GameController {
     @PostMapping("/game/game_over")
     public ResponseEntity<?> getAllOverGames(
 
-    ){
+    ) {
         try {
             return ResponseEntity.ok(gameService.getAllOverGames());
-        }catch (Exception e ){
+        } catch (Exception e) {
             return ResponseEntity.ok(e.getMessage());
         }
     }
-
 
 
 }

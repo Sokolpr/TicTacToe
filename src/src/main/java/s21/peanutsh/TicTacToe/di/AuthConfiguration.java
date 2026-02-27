@@ -31,7 +31,8 @@ public class AuthConfiguration {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/auth/login").permitAll()
+                        .requestMatchers("/auth/signup").permitAll()
                         .requestMatchers("/auth/update/access").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
@@ -68,8 +69,8 @@ public class AuthConfiguration {
     }
 
     @Bean
-    public UserService userService(PasswordEncoder passwordEncoder, PersonRepository personRepository){
-        return new UserServiceImpl(passwordEncoder,personRepository);
+    public UserService userService(PasswordEncoder passwordEncoder, PersonRepository personRepository) {
+        return new UserServiceImpl(passwordEncoder, personRepository);
     }
 
     @Bean
@@ -78,7 +79,7 @@ public class AuthConfiguration {
     }
 
     @Bean
-    public JwtUtil jwtUtil(){
+    public JwtUtil jwtUtil() {
         return new JwtUtilImpl();
     }
 

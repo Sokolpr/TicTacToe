@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import s21.peanutsh.TicTacToe.domain.model.StateGame;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
@@ -13,6 +14,8 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @ToString
+@AllArgsConstructor
+@Builder
 public class ModelEntity {
 
     @Id
@@ -25,17 +28,9 @@ public class ModelEntity {
     @Enumerated(EnumType.STRING)
     private StateGame stateGame;
     private Boolean gameOver;
+    private LocalDate createDate;
 
 
-    @Builder
-public ModelEntity(UUID uuidGame, String field, Boolean bot, UUID firstPlayer, UUID secondPlayer, StateGame stateGame, boolean gameOver) {
-        this.uuidGame = uuidGame;
-        this.field = field;
-        this.bot = bot;
-        this.firstPlayer = firstPlayer;
-        this.secondPlayer = secondPlayer;
-        this.stateGame = stateGame;
-        this.gameOver = gameOver;
-    }
+
 
 }

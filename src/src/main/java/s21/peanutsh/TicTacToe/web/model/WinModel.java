@@ -9,7 +9,14 @@ import java.util.UUID;
 @Getter
 @Setter
 @AllArgsConstructor
-public class WinModel {
+public class WinModel implements Comparable<WinModel> {
     private UUID uuid;
     private Double percentWinning;
+
+    @Override
+    public int compareTo(WinModel o) {
+        return (int) (this.percentWinning * 100 - o.percentWinning * 100);
+    }
+
+
 }

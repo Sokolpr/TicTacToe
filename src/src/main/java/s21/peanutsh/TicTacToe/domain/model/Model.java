@@ -2,6 +2,7 @@ package s21.peanutsh.TicTacToe.domain.model;
 
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -19,6 +20,7 @@ public class Model {
     private Boolean playingWithComputer;
     private UUID secondPlayer;
     private Boolean gameOver;
+    private LocalDate createDate;
 
 
     public Model(boolean playingWithComputer) {
@@ -29,6 +31,7 @@ public class Model {
         this.playingWithComputer = playingWithComputer;
         stateGame = StateGame.WAITING_PLAYERS;
         gameOver = false;
+        createDate = LocalDate.now();
     }
 
 
@@ -39,7 +42,7 @@ public class Model {
         this.secondPlayer = model.getSecondPlayer();
         this.playingWithComputer = model.getPlayingWithComputer();
         this.gameOver = model.getGameOver();
-
+        this.createDate = model.getCreateDate();
         this.field = new int[3][3];
         for (int i = 0; i < 3; i++) {
             System.arraycopy(model.getField()[i], 0, this.field[i], 0, 3);
@@ -76,13 +79,10 @@ public class Model {
     }
 
     public boolean yourTurn(UUID uuidUser) {
-        if (uuidUser == null || firstPlayer == null || secondPlayer == null) {
-            return false;
-        }
 
-        if (uuidUser.equals(firstPlayer)) {
+        if (Objects.equals(uuidUser, firstPlayer)) {
             return stateGame == StateGame.TURN_FIRST_PLAYER;
-        } else if (uuidUser.equals(secondPlayer)) {
+        } else if ((Objects.equals(uuidUser, secondPlayer))) {
             return stateGame == StateGame.TURN_SECOND_PLAYER;
         }
 
@@ -122,7 +122,7 @@ public class Model {
     }
 
     public void detectNextTurnPlayer(UUID uuidUser) {
-        if (Objects.equals(uuidUser,firstPlayer)) {
+        if (Objects.equals(uuidUser, firstPlayer)) {
             stateGame = StateGame.TURN_SECOND_PLAYER;
         } else {
             stateGame = StateGame.TURN_FIRST_PLAYER;
@@ -170,33 +170,33 @@ public class Model {
         return false;
     }
 
-    public boolean isValidityChange(Model model, UUID uuidUser) {
+    public boolean inValidityChange(Model model, UUID uuidUser) {
         if (model == null) {
-            return false;
+            return true;
         }
 
         if (!Objects.equals(uuidGame, model.getUuidGame())) {
-            return false;
+            return true;
         }
 
         if (stateGame != model.getStateGame()) {
-            return false;
+            return true;
         }
 
         if (!Objects.equals(firstPlayer, model.getFirstPlayer())) {
-            return false;
+            return true;
         }
 
         if (!Objects.equals(secondPlayer, model.getSecondPlayer())) {
-            return false;
+            return true;
         }
 
         if (gameOver != model.getGameOver()) {
-            return false;
+            return true;
         }
 
         if (playingWithComputer != model.getPlayingWithComputer()) {
-            return false;
+            return true;
         }
 
 
@@ -210,19 +210,19 @@ public class Model {
                     if (model.getField()[i][j] == detectUser(uuidUser)) {
                         change++;
                     } else {
-                        return false;
+                        return true;
                     }
                 } else if (field[i][j] == 1 || field[i][j] == 2) {
                     if (field[i][j] != model.getField()[i][j]) {
-                        return false;
+                        return true;
                     }
                 } else {
-                    return false;
+                    return true;
                 }
             }
         }
 
-        return change == 1;
+        return change != 1;
     }
 
 

@@ -3,7 +3,6 @@ package s21.peanutsh.TicTacToe.web.mapper;
 import s21.peanutsh.TicTacToe.domain.model.Model;
 import s21.peanutsh.TicTacToe.web.model.WebModel;
 
-import java.util.UUID;
 
 public class GameMapper {
 
@@ -15,6 +14,7 @@ public class GameMapper {
                 .playingWithBot(model.getPlayingWithComputer())
                 .stateGame(model.getStateGame())
                 .gameOver(model.getGameOver())
+                .createDate(model.getCreateDate())
                 .build();
         for (int i = 0; i < 3; i++) {
             System.arraycopy(model.getField()[i], 0, webModel.getField()[i], 0, 3);
@@ -32,6 +32,7 @@ public class GameMapper {
                 .playingWithComputer(webModel.getPlayingWithBot())
                 .stateGame(webModel.getStateGame())
                 .gameOver(webModel.getGameOver())
+                .createDate(webModel.getCreateDate())
                 .build();
         for (int i = 0; i < 3; i++) {
             System.arraycopy(webModel.getField()[i], 0, model.getField()[i], 0, 3);

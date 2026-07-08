@@ -1,11 +1,15 @@
 package s21.peanutsh.TicTacToe.web.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
 
-@Data
+import lombok.*;
+
+
+@Getter
+@Setter
 @AllArgsConstructor
-public class SignUpRequest {
+@Builder
+public class JWTRequest {
     private String login;
     private String password;
+
 }

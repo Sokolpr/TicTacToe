@@ -1,27 +1,22 @@
 package s21.peanutsh.TicTacToe.domain.service;
 
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import s21.peanutsh.TicTacToe.datasource.repository.RepositoryPerson;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.logging.Logger;
 
+@Component
+@Slf4j
+@RequiredArgsConstructor
 public class AuthFilter extends GenericFilter {
-    private static final Logger logger = Logger.getLogger(AuthFilter.class.getName());
-    private final RepositoryPerson repositoryPerson;
-    private final PasswordEncoder passwordEncoder;
-
-
-    public AuthFilter(RepositoryPerson repositoryPerson, PasswordEncoder passwordEncoder) {
-        this.repositoryPerson = repositoryPerson;
-        this.passwordEncoder = passwordEncoder;
-    }
+    private final JwtProvider jwtProvider;
+    private final JwtUtil jwtUtil;
 
 
     //ServletRequest - запрос, который приходит на фильтр.
@@ -32,34 +27,25 @@ public class AuthFilter extends GenericFilter {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         String requestURI = request.getRequestURI();
-        if (requestURI.startsWith("/auth/login") || requestURI.startsWith("/auth/signup")) {
+        if (requestURI.startsWith("/auth/login") || requestURI.startsWith("/auth/signup") || requestURI.startsWith("/auth/update/access")) {
             filterChain.doFilter(request, response);// отправляем запрос следующему фильтру
             return;
 
         } else {
             try {
-
                 String authHeader = request.getHeader("Authorization");
                 if (authHeader == null) {
                     throw new SecurityException("Missing Authorization header");
                 }
-                //достаем из заголовка логи и пароль
-                String[] auth = DecodeBase64.decodeBase64(authHeader);
-                var entity = repositoryPerson.findByLogin(auth[0]); // находим по логину человека
-                if (entity.isPresent()) {
-                    if (passwordEncoder.matches(auth[1], entity.get().getPassword())) { //проверяем совпадают ли пароли
-                        UsernamePasswordAuthenticationToken authenticationToken =
-                                new UsernamePasswordAuthenticationToken
-                                        (entity.get().getUuid(), null, Collections.emptyList()); // сохраняем в токен
-                        SecurityContextHolder.getContext().setAuthentication(authenticationToken); // сохраняем токен в контекст
-                        filterChain.doFilter(request, response);
-                        return;
-
-                    } else {
-                        throw new SecurityException("Invalid password");
-                    }
+                var token = authHeader.substring(7);
+                if (jwtProvider.validateAccessToken(token)) {
+                    Claims claims = jwtProvider.getAccessClaims(token);
+                    var auth = jwtUtil.generate(claims);
+                    auth.setAuthenticated(true);
+                    SecurityContextHolder.getContext().setAuthentication(auth);
+                    filterChain.doFilter(request, response);
                 } else {
-                    throw new SecurityException("User not found");
+                    throw new SecurityException("Missing Authorization header");
                 }
 
             } catch (Exception e) {
